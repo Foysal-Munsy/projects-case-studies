@@ -184,19 +184,56 @@ a:hover {
     border: 1px solid var(--border);
     border-radius: 10px;
     overflow-x: auto;
-    /* Hide the raw source until Mermaid has drawn the SVG. */
-    color: transparent;
-    font-size: 0;
-    line-height: 0;
+    /*
+      Hide the raw source until Mermaid has drawn the SVG. We use visibility
+      (not font-size:0 or color:transparent) so we never interfere with how
+      Mermaid measures label widths - zeroing the font size can make it size
+      the boxes too small and clip the text.
+    */
+    visibility: hidden;
 }
 
 .prose pre.mermaid[data-rendered="true"] {
-    color: inherit;
-    font-size: inherit;
-    line-height: inherit;
+    visibility: visible;
 }
 
 .prose pre.mermaid svg {
     max-width: 100%;
     height: auto;
+}
+
+/*
+  Product screenshots inside a case study. Rendered as a figure with a caption
+  so they read as documented UI rather than a bare image.
+*/
+.prose .cs-figure {
+    margin: 1.75rem 0;
+}
+
+.prose .cs-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-subtle);
+}
+
+.prose .cs-figure figcaption {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* A row of screenshots that sit side by side on wider screens. */
+.prose .cs-figure-row {
+    display: grid;
+    gap: 1rem;
+    margin: 1.75rem 0;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+}
+
+.prose .cs-figure-row .cs-figure {
+    margin: 0;
 }

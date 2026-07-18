@@ -2,26 +2,35 @@
 title: "CredosisApi - Meeting Booking & Business Operations Backend"
 summary: "A .NET backend that runs a Calendly-style meeting scheduler and the admin console behind it: safe booking under load, Google Calendar + Meet sync, and email that actually gets delivered."
 role: "Backend Engineer / Architect"
-timeframe: "2025"
+timeframe: "2026"
+liveUrl: "https://credosis.com/contact#book"
 tech:
-    - ".NET 8"
-    - "ASP.NET Core"
-    - "EF Core"
-    - "PostgreSQL"
-    - "Google Calendar API"
-    - "Brevo"
-    - "Docker"
-    - "Render"
-    - "Serilog"
-    - "JWT"
+  - ".NET 8"
+  - "ASP.NET Core"
+  - "EF Core"
+  - "PostgreSQL"
+  - "Google Calendar API"
+  - "Brevo"
+  - "Docker"
+  - "Render"
+  - "Serilog"
+  - "JWT"
 order: 1
 draft: false
 ---
 
+export const base = import.meta.env.BASE_URL;
+export const img = (name) =>
+  `${base.replace(/\/$/, "")}/images/credosisapi/${name}`;
+
 ## What it is
 
-CredosisApi is the backend for two things: a public meeting scheduler on the
-Credosis marketing site, and the internal admin console the team uses to run it.
+I built CredosisApi as part of the engineering team at
+[Credosis](https://www.credosis.com), the organization behind
+[credosis.com](https://www.credosis.com). It's the backend for two things: a
+public meeting scheduler on the Credosis marketing site, and the internal admin
+console the team uses to run it. The live booking flow it powers is on the
+Credosis site at [credosis.com/contact#book](https://credosis.com/contact#book).
 
 A visitor picks an open time slot and books a call in a couple of clicks, a lot
 like Calendly. Behind that single click, a few things need to happen - and all
@@ -121,6 +130,43 @@ flowchart LR
 Admins define **availability rules** - day of week, start and end time, slot
 length, how many people per slot. A generator then turns those rules into
 concrete, **bookable slots** for a date range. Visitors book against those slots.
+
+Here's what that looks like on the public site - a visitor picks a highlighted
+day, chooses an available time, then confirms with their details:
+
+<div class="cs-figure-row">
+  <figure class="cs-figure">
+    <img
+      src={img("booking-calendar.png")}
+      alt="Booking calendar showing a month with available days highlighted"
+      loading="lazy"
+    />
+    <figcaption>
+      Month view - only days with open slots are highlighted.
+    </figcaption>
+  </figure>
+  <figure class="cs-figure">
+    <img
+      src={img("booking-times.png")}
+      alt="Selected day expanded to show the available time slots"
+      loading="lazy"
+    />
+    <figcaption>Pick a day to see its available times.</figcaption>
+  </figure>
+  <figure class="cs-figure">
+    <img
+      src={img("booking-form.png")}
+      alt="Booking form asking for name, email, optional phone and notes, with a confirm button"
+      loading="lazy"
+    />
+    <figcaption>Enter details and confirm the booking.</figcaption>
+  </figure>
+
+</div>
+
+These are the public, visitor-facing screens the API serves. The internal admin
+console - where the team sets availability, generates slots, and manages
+bookings - is intentionally not shown here for organization security reasons.
 
 The key decision here: generating slots is an explicit admin action, not
 something that quietly happens when a visitor loads the page. That keeps the
@@ -290,8 +336,8 @@ stores the right moment.
 
 **What happens to slots when a rule changes.** Editing or deleting an
 availability rule shouldn't strand mismatched slots or quietly drop confirmed
-bookings. So the generator handles each case on purpose: future *unbooked* slots
-from a changed rule get removed, future *booked* slots get deactivated (the
+bookings. So the generator handles each case on purpose: future _unbooked_ slots
+from a changed rule get removed, future _booked_ slots get deactivated (the
 booking is kept, but no new bookings are accepted), and past slots are always
 kept as history.
 

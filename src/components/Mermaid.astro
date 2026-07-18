@@ -11,62 +11,79 @@
 ---
 
 <script>
-    import mermaid from "mermaid";
+  import mermaid from "mermaid";
 
-    // Keep the original diagram source around so we can re-render from scratch
-    // when the theme flips (Mermaid replaces the <pre> content with an <svg>).
-    const sources = new WeakMap<HTMLElement, string>();
+  // Keep the original diagram source around so we can re-render from scratch
+  // when the theme flips (Mermaid replaces the <pre> content with an <svg>).
+  const sources = new WeakMap<HTMLElement, string>();
 
-    function isDark() {
-        return document.documentElement.classList.contains("dark");
+  function isDark() {
+    return document.documentElement.classList.contains("dark");
+  }
+
+  async function renderAll() {
+    const blocks = Array.from(
+      document.querySelectorAll<HTMLElement>("pre.mermaid"),
+    );
+    if (blocks.length === 0) return;
+
+    // Wait for web fonts to settle before rendering. Mermaid measures label
+    // widths up front; if it measures with a fallback font and then the real
+    // font swaps in, the boxes come out too narrow and the text gets clipped.
+    if (document.fonts?.ready) {
+      try {
+        await document.fonts.ready;
+      } catch (_) {
+        /* fonts API unavailable - render anyway */
+      }
     }
 
-    async function renderAll() {
-        const blocks = Array.from(
-            document.querySelectorAll<HTMLElement>("pre.mermaid")
-        );
-        if (blocks.length === 0) return;
-
-        mermaid.initialize({
-            startOnLoad: false,
-            securityLevel: "loose",
-            theme: isDark() ? "dark" : "neutral",
-            fontFamily: "inherit",
-        });
-
-        for (let i = 0; i < blocks.length; i++) {
-            const el = blocks[i];
-
-            // Remember the source the first time we see this block.
-            if (!sources.has(el)) {
-                sources.set(el, el.textContent ?? "");
-            }
-            const code = sources.get(el) ?? "";
-
-            try {
-                const id = `mermaid-svg-${i}-${Date.now()}`;
-                const { svg } = await mermaid.render(id, code);
-                el.innerHTML = svg;
-                el.setAttribute("data-rendered", "true");
-            } catch (err) {
-                // If a diagram has a syntax error, leave the source visible
-                // instead of blowing up the page.
-                console.error("Mermaid render failed:", err);
-            }
-        }
-    }
-
-    // Initial render.
-    renderAll();
-
-    // Re-render when the theme toggle flips the `dark` class on <html>.
-    const observer = new MutationObserver((mutations) => {
-        for (const m of mutations) {
-            if (m.attributeName === "class") {
-                renderAll();
-                break;
-            }
-        }
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: "loose",
+      theme: isDark() ? "dark" : "neutral",
+      // Use a concrete font stack (not "inherit") so the font Mermaid
+      // measures with matches the font it renders with.
+      fontFamily:
+        '"Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+      // HTML labels grow the node/edge boxes to fit the text instead of
+      // clipping it, and useMaxWidth keeps diagrams responsive.
+      flowchart: { htmlLabels: true, useMaxWidth: true },
     });
-    observer.observe(document.documentElement, { attributes: true });
+
+    for (let i = 0; i < blocks.length; i++) {
+      const el = blocks[i];
+
+      // Remember the source the first time we see this block.
+      if (!sources.has(el)) {
+        sources.set(el, el.textContent ?? "");
+      }
+      const code = sources.get(el) ?? "";
+
+      try {
+        const id = `mermaid-svg-${i}-${Date.now()}`;
+        const { svg } = await mermaid.render(id, code);
+        el.innerHTML = svg;
+        el.setAttribute("data-rendered", "true");
+      } catch (err) {
+        // If a diagram has a syntax error, leave the source visible
+        // instead of blowing up the page.
+        console.error("Mermaid render failed:", err);
+      }
+    }
+  }
+
+  // Initial render.
+  renderAll();
+
+  // Re-render when the theme toggle flips the `dark` class on <html>.
+  const observer = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      if (m.attributeName === "class") {
+        renderAll();
+        break;
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true });
 </script>
