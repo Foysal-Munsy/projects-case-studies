@@ -1,0 +1,202 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Theme tokens as CSS custom properties. Light values live on :root, dark
+  overrides apply when the <html> element carries the `dark` class. The class
+  is set before paint by an inline script in BaseLayout to avoid a flash of the
+  wrong theme (FOUC).
+*/
+:root {
+    --bg: #ffffff;
+    --bg-subtle: #f5f6f8;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --text: #1a1a1a;
+    --text-muted: #5b6472;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --code-bg: #f5f6f8;
+}
+
+html.dark {
+    --bg: #0d1117;
+    --bg-subtle: #131a24;
+    --surface: #161b22;
+    --border: #26303d;
+    --text: #e6edf3;
+    --text-muted: #9aa7b4;
+    --accent: #6ea8fe;
+    --accent-hover: #93c0ff;
+    --code-bg: #161b22;
+}
+
+html {
+    background-color: var(--bg);
+    color: var(--text);
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: theme("fontFamily.sans");
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+/* Long-form article typography for MDX case studies. */
+.prose {
+    color: var(--text);
+    font-size: 1.0625rem;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+    color: var(--text);
+    font-weight: 700;
+    line-height: 1.25;
+    scroll-margin-top: 5rem;
+}
+
+.prose h2 {
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.6rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.prose h3 {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+}
+
+.prose p,
+.prose ul,
+.prose ol {
+    margin-top: 0.85rem;
+    margin-bottom: 0.85rem;
+}
+
+.prose ul,
+.prose ol {
+    padding-left: 1.4rem;
+}
+
+.prose li {
+    margin: 0.35rem 0;
+}
+
+.prose strong {
+    color: var(--text);
+    font-weight: 650;
+}
+
+.prose blockquote {
+    margin: 1.25rem 0;
+    padding: 0.5rem 1rem;
+    border-left: 3px solid var(--accent);
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    border-radius: 0 6px 6px 0;
+}
+
+.prose code {
+    font-family: theme("fontFamily.mono");
+    font-size: 0.875em;
+    background: var(--code-bg);
+    padding: 0.15em 0.4em;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+}
+
+.prose pre {
+    margin: 1.25rem 0;
+    padding: 1rem 1.15rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    font-size: 0.9rem;
+}
+
+/* Code inside a highlighted block shouldn't get the inline pill styling. */
+.prose pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+}
+
+.prose hr {
+    margin: 2.5rem 0;
+    border: none;
+    border-top: 1px solid var(--border);
+}
+
+.prose table {
+    width: 100%;
+    margin: 1.25rem 0;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.prose th,
+.prose td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+}
+
+.prose th {
+    background: var(--bg-subtle);
+    font-weight: 650;
+}
+
+/*
+  Mermaid diagram blocks. Before the client script runs, this is a <pre> that
+  briefly shows the raw diagram source; once rendered it holds an <svg>. We
+  center it, give it breathing room, and a soft surface so it reads as a figure
+  rather than a code block.
+*/
+.prose pre.mermaid {
+    display: flex;
+    justify-content: center;
+    margin: 1.75rem 0;
+    padding: 1.25rem;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow-x: auto;
+    /* Hide the raw source until Mermaid has drawn the SVG. */
+    color: transparent;
+    font-size: 0;
+    line-height: 0;
+}
+
+.prose pre.mermaid[data-rendered="true"] {
+    color: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.prose pre.mermaid svg {
+    max-width: 100%;
+    height: auto;
+}

@@ -1,0 +1,99 @@
+---
+import TechBadge from "./TechBadge.astro";
+
+// Homepage card linking to a case study. Tech list is truncated to keep cards
+// balanced; the full stack lives on the detail page.
+interface Props {
+    title: string;
+    summary: string;
+    href: string;
+    timeframe: string;
+    tech: string[];
+}
+const { title, summary, href, timeframe, tech } = Astro.props;
+const shownTech = tech.slice(0, 5);
+const extra = tech.length - shownTech.length;
+---
+
+<a href={href} class="card">
+    <div class="card-head">
+        <h3 class="card-title">{title}</h3>
+        <span class="card-timeframe">{timeframe}</span>
+    </div>
+    <p class="card-summary">{summary}</p>
+    <div class="card-tech">
+        {shownTech.map((t) => <TechBadge label={t} />)}
+        {extra > 0 && <span class="card-more">+{extra} more</span>}
+    </div>
+    <span class="card-cta">Read case study →</span>
+</a>
+
+<style>
+    .card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1.4rem;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        text-decoration: none;
+        color: var(--text);
+        height: 100%;
+        transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .card:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .card-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .card-title {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .card-timeframe {
+        font-family: theme("fontFamily.mono");
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+
+    .card-summary {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.55;
+    }
+
+    .card-tech {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        align-items: center;
+    }
+
+    .card-more {
+        font-family: theme("fontFamily.mono");
+        font-size: 0.72rem;
+        color: var(--text-muted);
+    }
+
+    .card-cta {
+        margin-top: auto;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--accent);
+    }
+</style>

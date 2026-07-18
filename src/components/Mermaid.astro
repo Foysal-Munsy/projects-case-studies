@@ -1,0 +1,72 @@
+---
+// Renders any <pre class="mermaid"> blocks on the page into SVG diagrams.
+// The remark plugin in astro.config.mjs turns ```mermaid code fences into
+// those <pre> blocks, so case-study authors just write plain Mermaid and this
+// component does the rest — including re-drawing when the light/dark theme
+// changes so diagrams always match the page.
+//
+// Mermaid is loaded from a CDN as an ES module. It's only pulled in on pages
+// that actually include this component (the case-study layout), so the
+// homepage stays lightweight.
+---
+
+<script>
+    import mermaid from "mermaid";
+
+    // Keep the original diagram source around so we can re-render from scratch
+    // when the theme flips (Mermaid replaces the <pre> content with an <svg>).
+    const sources = new WeakMap<HTMLElement, string>();
+
+    function isDark() {
+        return document.documentElement.classList.contains("dark");
+    }
+
+    async function renderAll() {
+        const blocks = Array.from(
+            document.querySelectorAll<HTMLElement>("pre.mermaid")
+        );
+        if (blocks.length === 0) return;
+
+        mermaid.initialize({
+            startOnLoad: false,
+            securityLevel: "loose",
+            theme: isDark() ? "dark" : "neutral",
+            fontFamily: "inherit",
+        });
+
+        for (let i = 0; i < blocks.length; i++) {
+            const el = blocks[i];
+
+            // Remember the source the first time we see this block.
+            if (!sources.has(el)) {
+                sources.set(el, el.textContent ?? "");
+            }
+            const code = sources.get(el) ?? "";
+
+            try {
+                const id = `mermaid-svg-${i}-${Date.now()}`;
+                const { svg } = await mermaid.render(id, code);
+                el.innerHTML = svg;
+                el.setAttribute("data-rendered", "true");
+            } catch (err) {
+                // If a diagram has a syntax error, leave the source visible
+                // instead of blowing up the page.
+                console.error("Mermaid render failed:", err);
+            }
+        }
+    }
+
+    // Initial render.
+    renderAll();
+
+    // Re-render when the theme toggle flips the `dark` class on <html>.
+    const observer = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+            if (m.attributeName === "class") {
+                renderAll();
+                break;
+            }
+        }
+    });
+    observer.observe(document.documentElement, { attributes: true });
+</script>

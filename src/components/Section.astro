@@ -1,0 +1,14 @@
+---
+// Reusable width-constrained section wrapper. `wide` opts into the wider
+// container used by the homepage; the default is the narrower reading width.
+interface Props {
+    wide?: boolean;
+    class?: string;
+}
+const { wide = false, class: className = "" } = Astro.props;
+const maxWidth = wide ? "max-w-wide" : "max-w-content";
+---
+
+<section class={`mx-auto w-full px-5 sm:px-6 ${maxWidth} ${className}`}>
+    <slot />
+</section>

@@ -1,0 +1,112 @@
+---
+import "../styles/global.css";
+import ThemeToggle from "../components/ThemeToggle.astro";
+
+// The shared HTML shell: <head> meta, nav with theme toggle, and footer.
+interface Props {
+    title: string;
+    description?: string;
+}
+const { title, description = "Selected projects and engineering case studies." } =
+    Astro.props;
+
+// base is "/" in dev and "/<repo>" on GitHub Pages; use it to build root-relative
+// links that work in both places.
+const base = import.meta.env.BASE_URL;
+const home = base.endsWith("/") ? base : `${base}/`;
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content={description} />
+        <title>{title}</title>
+        <link rel="icon" type="image/svg+xml" href={`${home}favicon.svg`} />
+
+        {/*
+          Apply the saved (or system) theme before the first paint so there is no
+          flash of the wrong theme. Runs synchronously in <head> on purpose.
+        */}
+        <script is:inline>
+            (() => {
+                try {
+                    const stored = localStorage.getItem("theme");
+                    const prefersDark = window.matchMedia(
+                        "(prefers-color-scheme: dark)"
+                    ).matches;
+                    const dark = stored ? stored === "dark" : prefersDark;
+                    if (dark) document.documentElement.classList.add("dark");
+                } catch (_) {
+                    /* default to light if storage/media queries are unavailable */
+                }
+            })();
+        </script>
+    </head>
+    <body>
+        <header class="site-header">
+            <nav class="nav">
+                <a href={home} class="brand">~/projects</a>
+                <ThemeToggle />
+            </nav>
+        </header>
+
+        <main class="site-main">
+            <slot />
+        </main>
+
+        <footer class="site-footer">
+            <p>&copy; {year} — Built with Astro. Case studies &amp; selected work.</p>
+        </footer>
+
+        <style>
+            .site-header {
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                backdrop-filter: blur(8px);
+                background: color-mix(in srgb, var(--bg) 82%, transparent);
+                border-bottom: 1px solid var(--border);
+            }
+
+            .nav {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                max-width: 72rem;
+                margin: 0 auto;
+                padding: 0.85rem 1.25rem;
+            }
+
+            .brand {
+                font-family: theme("fontFamily.mono");
+                font-weight: 700;
+                font-size: 0.95rem;
+                color: var(--text);
+            }
+
+            .brand:hover {
+                color: var(--accent);
+                text-decoration: none;
+            }
+
+            .site-main {
+                padding: 2.5rem 0 4rem;
+            }
+
+            .site-footer {
+                border-top: 1px solid var(--border);
+                padding: 1.75rem 1.25rem;
+                text-align: center;
+            }
+
+            .site-footer p {
+                margin: 0;
+                font-size: 0.82rem;
+                color: var(--text-muted);
+            }
+        </style>
+    </body>
+</html>

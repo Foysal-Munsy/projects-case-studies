@@ -1,0 +1,71 @@
+---
+// A dark/light theme toggle. The actual theme class is applied before paint by
+// an inline script in BaseLayout; this button only flips it and persists the
+// choice to localStorage. Icons are swapped purely with CSS based on the
+// `dark` class so there's no JS flicker.
+---
+
+<button
+    id="theme-toggle"
+    type="button"
+    aria-label="Toggle color theme"
+    title="Toggle theme"
+    class="theme-toggle"
+>
+    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+    </svg>
+    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+</button>
+
+<style>
+    .theme-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        cursor: pointer;
+        transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .theme-toggle:hover {
+        border-color: var(--accent);
+    }
+
+    /* Show sun in light mode, moon in dark mode. */
+    .icon-moon {
+        display: none;
+    }
+
+    :global(html.dark) .icon-sun {
+        display: none;
+    }
+
+    :global(html.dark) .icon-moon {
+        display: inline;
+    }
+</style>
+
+<script is:inline>
+    (() => {
+        const btn = document.getElementById("theme-toggle");
+        if (!btn) return;
+        btn.addEventListener("click", () => {
+            const root = document.documentElement;
+            const isDark = root.classList.toggle("dark");
+            try {
+                localStorage.setItem("theme", isDark ? "dark" : "light");
+            } catch (_) {
+                /* storage may be unavailable; ignore */
+            }
+        });
+    })();
+</script>

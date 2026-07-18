@@ -1,0 +1,29 @@
+---
+import { getCollection } from "astro:content";
+import CaseStudyLayout from "../../layouts/CaseStudyLayout.astro";
+
+// Pre-render one page per case study at build time (required for static output).
+export async function getStaticPaths() {
+    const entries = await getCollection("case-studies");
+    return entries.map((entry) => ({
+        params: { slug: entry.slug },
+        props: { entry },
+    }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const d = entry.data;
+---
+
+<CaseStudyLayout
+    title={d.title}
+    summary={d.summary}
+    role={d.role}
+    timeframe={d.timeframe}
+    tech={d.tech}
+    repo={d.repo}
+    liveUrl={d.liveUrl}
+>
+    <Content />
+</CaseStudyLayout>

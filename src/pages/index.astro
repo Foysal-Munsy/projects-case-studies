@@ -1,0 +1,76 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Section from "../components/Section.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+
+// List all non-draft case studies, sorted by `order` then title.
+const base = import.meta.env.BASE_URL;
+const home = base.endsWith("/") ? base : `${base}/`;
+
+const entries = (await getCollection("case-studies"))
+    .filter((e) => !e.data.draft)
+    .sort((a, b) => {
+        if (a.data.order !== b.data.order) return a.data.order - b.data.order;
+        return a.data.title.localeCompare(b.data.title);
+    });
+---
+
+<BaseLayout title="Projects & Case Studies">
+    <Section wide>
+        <div class="intro">
+            <h1>Projects &amp; Case Studies</h1>
+            <p>
+                A collection of engineering work — the problems, the decisions,
+                and how each system was built. Each entry goes past the surface
+                into architecture and trade-offs.
+            </p>
+        </div>
+
+        {entries.length === 0 ? (
+            <p class="empty">No case studies published yet.</p>
+        ) : (
+            <div class="grid">
+                {entries.map((entry) => (
+                    <ProjectCard
+                        title={entry.data.title}
+                        summary={entry.data.summary}
+                        timeframe={entry.data.timeframe}
+                        tech={entry.data.tech}
+                        href={`${home}case-studies/${entry.slug}`}
+                    />
+                ))}
+            </div>
+        )}
+    </Section>
+</BaseLayout>
+
+<style>
+    .intro {
+        max-width: 40rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .intro h1 {
+        margin: 0 0 0.75rem;
+        font-size: 2.4rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .intro p {
+        margin: 0;
+        font-size: 1.1rem;
+        color: var(--text-muted);
+    }
+
+    .grid {
+        display: grid;
+        gap: 1.25rem;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    }
+
+    .empty {
+        color: var(--text-muted);
+    }
+</style>
