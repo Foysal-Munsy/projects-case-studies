@@ -5,7 +5,7 @@ import tailwind from "@astrojs/tailwind";
 // Turn ```mermaid code fences into <pre class="mermaid"> blocks so the client
 // can render them as diagrams. We do this in a remark plugin (before syntax
 // highlighting) so Shiki leaves the diagram source alone. Authors just write a
-// normal ```mermaid block in any .mdx file — no imports, no image files.
+// normal ```mermaid block in any .mdx file - no imports, no image files.
 function escapeHtml(value) {
     return value
         .replace(/&/g, "&amp;")

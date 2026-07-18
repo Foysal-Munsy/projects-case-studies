@@ -1,5 +1,5 @@
 ---
-title: "CredosisApi — Meeting Booking & Business Operations Backend"
+title: "CredosisApi - Meeting Booking & Business Operations Backend"
 summary: "A .NET backend that runs a Calendly-style meeting scheduler and the admin console behind it: safe booking under load, Google Calendar + Meet sync, and email that actually gets delivered."
 role: "Backend Engineer / Architect"
 timeframe: "2025"
@@ -24,7 +24,7 @@ CredosisApi is the backend for two things: a public meeting scheduler on the
 Credosis marketing site, and the internal admin console the team uses to run it.
 
 A visitor picks an open time slot and books a call in a couple of clicks, a lot
-like Calendly. Behind that single click, a few things need to happen — and all
+like Calendly. Behind that single click, a few things need to happen - and all
 of them need to go right:
 
 - the seat gets reserved safely, even if two people click at the same second,
@@ -49,7 +49,7 @@ flowchart LR
     MAIL --> A
 ```
 
-The goal was a small, dependable service with no surprises in production — where
+The goal was a small, dependable service with no surprises in production - where
 a third-party outage slows things down gracefully instead of breaking a booking,
 and where every change is something you can look up afterward.
 
@@ -59,7 +59,7 @@ Credosis needed its own booking backend rather than an off-the-shelf scheduler,
 for three reasons:
 
 - **Own the booking experience.** The scheduling UI is part of the marketing
-  site, so the booking logic had to plug into a custom frontend — not sit inside
+  site, so the booking logic had to plug into a custom frontend - not sit inside
   someone else's embedded widget.
 - **Real calendar integration.** Every booking has to land on the team's Google
   Calendar with a working Meet link, automatically. No copy-pasting links by
@@ -68,7 +68,7 @@ for three reasons:
   can't be "send it and hope." A dropped confirmation email is a missed meeting.
 
 Once scheduling was covered, the same service picked up contact management,
-analytics, and an audit trail — the everyday plumbing that turns a booking
+analytics, and an audit trail - the everyday plumbing that turns a booking
 endpoint into a tool the team can actually run the business on.
 
 ## How the code is organized
@@ -114,11 +114,11 @@ The scheduling core has three steps stacked on top of each other.
 
 ```mermaid
 flowchart LR
-    R["Availability rule<br/>e.g. Mon 9–5, 30-min slots"] -->|"admin generates"| S["Bookable slots<br/>concrete times"]
+    R["Availability rule<br/>e.g. Mon 9-5, 30-min slots"] -->|"admin generates"| S["Bookable slots<br/>concrete times"]
     S -->|"visitor books"| BK["Booking"]
 ```
 
-Admins define **availability rules** — day of week, start and end time, slot
+Admins define **availability rules** - day of week, start and end time, slot
 length, how many people per slot. A generator then turns those rules into
 concrete, **bookable slots** for a date range. Visitors book against those slots.
 
@@ -159,7 +159,7 @@ sequenceDiagram
     A->>DB: commit ✓
     Note over A,DB: A wins the seat
     B->>DB: commit ✗ (version already moved to 5)
-    Note over B,DB: "try another slot" — no 500, no negative seats
+    Note over B,DB: "try another slot" - no 500, no negative seats
 ```
 
 The fix is an optimistic concurrency token plus a database transaction. Each slot
@@ -194,7 +194,7 @@ helpful message, and the seat count never goes negative.
 
 Every booking creates a Google Calendar event with an auto-generated Meet link,
 and adds the visitor as a guest. It authenticates with a long-lived refresh
-token, so the service quietly mints fresh access tokens as they expire — no
+token, so the service quietly mints fresh access tokens as they expire - no
 interactive login in production.
 
 The important design choice: the whole Google integration is **best-effort**. It
@@ -227,7 +227,7 @@ And one subtle but important detail: these calendar calls happen **after** the
 database transaction commits. A slow response from Google never holds a database
 lock or blocks the visitor's request.
 
-### Email that doesn't get lost — the outbox pattern
+### Email that doesn't get lost - the outbox pattern
 
 Email reliability uses the **transactional outbox** pattern. Services never call
 the email provider directly. Instead they drop a message into an `OutboxMessage`
@@ -250,7 +250,7 @@ This gives two guarantees:
   happen.
 
 Delivery goes through the **Brevo HTTP API** (port 443) instead of SMTP, because
-a lot of hosts — including Render's free tier — block outbound SMTP ports. A full
+a lot of hosts - including Render's free tier - block outbound SMTP ports. A full
 SMTP sender is still in the codebase as a drop-in backup. Every email type has a
 branded HTML template on a shared layout: booking confirmation, reschedule,
 cancellation, the matching admin notifications, a contact-form alert, and
@@ -265,8 +265,8 @@ simple, but it means the team doesn't need a second tool just for inbound leads.
 
 ### Audit logging
 
-Every privileged action — creating an availability rule, generating slots,
-cancelling or rescheduling a booking, changing a contact's status — is written to
+Every privileged action - creating an availability rule, generating slots,
+cancelling or rescheduling a booking, changing a contact's status - is written to
 an append-only audit log. It records who did it and from what IP, pulled from the
 request context. A query service exposes the trail with paging and filters, so
 "who changed this, and when" always has an answer.
@@ -276,14 +276,14 @@ request context. A query service exposes the trail with paging and filters, so
 The admin side sits behind JWT authentication, with the settings validated on
 startup so a bad config fails immediately instead of at the first request. A
 dashboard service rolls up operational numbers (bookings, contacts, email
-health) and an analytics service shows trends — one at-a-glance view for the
+health) and an analytics service shows trends - one at-a-glance view for the
 team.
 
 ## Problems I ran into
 
 **Time zones.** Availability rules are written in Bangladesh local time, but
 slots are stored as UTC. Early on, "09:00" got saved as 09:00 UTC and then shown
-as 3 PM locally — clearly wrong. The fix was a dedicated `BusinessClock`: rule
+as 3 PM locally - clearly wrong. The fix was a dedicated `BusinessClock`: rule
 times are read in the business time zone and converted to UTC when slots are
 generated, and Google Calendar gets the wall-clock time plus a time-zone id so it
 stores the right moment.
@@ -302,7 +302,7 @@ core booking flow.
 
 **Consistent errors.** Domain exceptions map to Problem Details responses, so the
 frontend can tell "slot full" (conflict) apart from "not found" apart from
-"validation failed" — without matching on error message strings.
+"validation failed" - without matching on error message strings.
 
 ## Deployment
 
@@ -310,7 +310,7 @@ The service ships as a Docker image and runs on Render, configured through
 `render.yaml`. Config and secrets come from environment variables (with a
 gitignored `.env` for local dev), and the connection string accepts either the
 native Npgsql format or a `postgres://` URI, so a provider-issued string can be
-pasted in as-is. Health checks — including a database readiness probe — back the
+pasted in as-is. Health checks - including a database readiness probe - back the
 platform's monitoring, and migrations can run automatically on startup behind a
 config flag. Serilog handles structured request and app logging, and
 `X-Forwarded-*` headers are honored so the real client IP and scheme survive the
@@ -322,13 +322,13 @@ reverse proxy.
   email durable-by-queue turned two potential single points of failure into
   non-events. The booking succeeds either way.
 - **Keep side effects out of read paths.** Making slot generation an explicit
-  admin action — not a side effect of a public page load — removed a whole class
+  admin action - not a side effect of a public page load - removed a whole class
   of "why did these slots come back?" bugs.
 - **Model time zones on purpose.** A single `BusinessClock` boundary between
   local-time rules and UTC storage prevented a whole category of off-by-hours
   bugs.
 - **Optimistic concurrency is usually enough.** For last-seat contention, a
-  version number plus a transaction and a friendly retry beat heavier locking —
+  version number plus a transaction and a friendly retry beat heavier locking -
   simpler code and a better experience.
 - **Auditability is a feature.** Logging every privileged action from day one
   made the admin console trustworthy and debugging almost boring.

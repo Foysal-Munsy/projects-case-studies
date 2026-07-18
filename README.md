@@ -5,15 +5,15 @@ studies. Content is authored in MDX; the site is fully static and deploys to
 GitHub Pages.
 
 > This lives inside the CredosisApi repo for convenience during development. It
-> is an independent project and can be moved to its own repository at any time —
+> is an independent project and can be moved to its own repository at any time -
 > nothing here depends on the parent repo.
 
 ## Stack
 
-- **Astro** — static site generator
-- **MDX** — rich case-study content
-- **Tailwind CSS** — styling
-- **Mermaid** — text-based diagrams that render to SVG (architecture, flows, etc.)
+- **Astro** - static site generator
+- **MDX** - rich case-study content
+- **Tailwind CSS** - styling
+- **Mermaid** - text-based diagrams that render to SVG (architecture, flows, etc.)
 - Dark/light theme with `localStorage` persistence and no flash on load (FOUC-free)
 
 
@@ -56,7 +56,7 @@ Write the case study in Markdown/MDX here...
 
 ## Adding diagrams (Mermaid)
 
-Diagrams are written as text, right inside the `.mdx` file — no image files, no
+Diagrams are written as text, right inside the `.mdx` file - no image files, no
 external tools. Just write a ` ```mermaid ` code block and it renders to an SVG
 automatically, matching the light/dark theme. Edit a line in GitHub and the
 diagram updates on the next deploy.
@@ -72,7 +72,7 @@ flowchart LR
 Common types: `flowchart` (boxes and arrows), `sequenceDiagram` (step-by-step
 between actors), and `stateDiagram-v2` (lifecycles). See the
 [Mermaid docs](https://mermaid.js.org/) for the full syntax. If a diagram has a
-typo, the raw text stays visible instead of breaking the page — check the browser
+typo, the raw text stays visible instead of breaking the page - check the browser
 console for the error.
 
 ## Project structure
